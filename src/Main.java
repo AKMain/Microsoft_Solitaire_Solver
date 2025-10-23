@@ -4,13 +4,15 @@ public class Main {
 
     public static void main(String[] args) {
 //        System.out.println("\n10S\n");
-        SolitareScanner.cardRead(910, 600);
+//        SolitareScanner.cardRead(910, 600);
 //        System.out.println("\n8H\n");
 //        SolitareScanner.cardRead(280, 385);
 //        System.out.println("\n5C\n");
 //        SolitareScanner.cardRead(450, 385);
 //        System.out.println("\nAC\n");
 //        SolitareScanner.cardRead(365, 340);
+
+        System.out.println(SolitareScanner.valueReader(910,600));
 
 
         int suit = SolitareScanner.suitReader(910, 623);
