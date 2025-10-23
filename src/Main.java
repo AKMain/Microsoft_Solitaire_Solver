@@ -1,30 +1,21 @@
 public class Main {
 
+    public static void cardDetectiontestFn(int col,int row){
+        System.out.println(SolitareScanner.cardRead(282+172*col+86*row,388-46*row));
+    }
 
 
     public static void main(String[] args) {
-//        System.out.println("\n10S\n");
-//        SolitareScanner.cardRead(910, 600);
-//        System.out.println("\n8H\n");
-//        SolitareScanner.cardRead(280, 385);
-//        System.out.println("\n5C\n");
-//        SolitareScanner.cardRead(450, 385);
-//        System.out.println("\nAC\n");
-//        SolitareScanner.cardRead(365, 340);
-
-        System.out.println(SolitareScanner.valueReader(910,600));
 
 
-        int suit = SolitareScanner.suitReader(910, 623);
-        if (suit == 1){
-            System.out.println(" H");
-        }else if (suit == 2){
-            System.out.println(" D");
-        }else if (suit == 3){
-            System.out.println(" C");
-        }else{
-            System.out.println(" S");
+        Pyramid gamev3 = new Pyramid();
+        for (int i = 0; i < 24; i++) {
+            gamev3.nextCard();
+            gamev3.dataDump();
         }
+        gamev3.solver();
+
+
 
 
     }

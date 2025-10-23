@@ -1,48 +1,73 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
-
+import java.util.ArrayList;
+import java.awt.event.InputEvent;
 public class SolitareScanner {
+    static boolean debug = false;
+
     // 1 = Hearts, 2 = dimonds, 3 = clubs, 4 = speads
 
     public static Card cardRead(int x,int y){
-        int [][] cardIndicator = new int[20][40];
-//280, 385
-//295, 425
+
+
+        if (debug){
+            System.out.println();
+        }
+
+        int width = 18;
+        int hight = 40;
+
+        ArrayList<Integer> cardGaps = new ArrayList<>();
+
         try{
             Robot robot = new Robot();
-            Rectangle screenRect = new Rectangle(x, y, 20, 40);
+            Rectangle screenRect = new Rectangle(x, y, width, hight);
             BufferedImage image = robot.createScreenCapture(screenRect);
 
-            int sum;
+            int sumold=0,sumnew=0;
 
-            for (int i = 0; i < 40; i++) {
-                sum=0;
-                for (int j = 0; j < 20; j++) {
 
-                    int pixelRGB = saturation(image.getRGB(j, i),true);
-                    // 0 = white, 1 = black, 2 = red
 
-                    cardIndicator[j][i]=pixelRGB;
+            for (int i = 0; i < hight; i++) {
+                sumnew=0;
+                for (int j = 0; j < width; j++) {
+                    sumnew+=saturation(image.getRGB(j, i),false);
 
-                    sum+=pixelRGB;
-
-//                    System.out.print(pixelRGB+"\t");
+                    if (debug){
+                        System.out.print(saturation(image.getRGB(j, i),false)+"\t");
+                    }
 
                 }
-                System.out.print(sum+",");
+
+                if (debug){
+                    System.out.println(sumnew);
+                }
+
+                if (sumnew!=0 && sumold==0){
+                    cardGaps.add(i-1);
+                }
+                sumold=sumnew;
 
             }
 
         }catch(AWTException e) {
-            System.out.println("Error in valueReader -robot");
+            System.out.println("AWTException -cardRead");
 
         }catch (Exception e){
-            System.out.println("Error in valueReader");
+            System.out.println("Exception -cardRead");
         }
 
-        //now using the array we need to find the number + suit.
 
-        return new Card(0,0);
+
+        int val = valueReader(x,y+ cardGaps.get(0));
+        int suit = suitReader(x,y+ cardGaps.get(1));
+
+        if (debug){
+            System.out.println(cardGaps);
+            System.out.println(new Card(x,y,val,suit));
+        }
+
+        return new Card(x,y,val,suit);
     }
 
 
@@ -62,9 +87,9 @@ public class SolitareScanner {
 
                     // 0 = white, 1 = black, 2 = red
                     rowsum[i]+=unit;
-                    System.out.print(unit+"\t");
+
                 }
-                System.out.println();
+
             }
 
         }catch(AWTException e) {
@@ -74,10 +99,21 @@ public class SolitareScanner {
             System.out.println("Exception -rowsumScanner");
         }
 
+        if (debug){
+            for (int i = 0; i < rowsum.length; i++) {
+                System.out.print(rowsum[i]+", ");
+            }
+            System.out.println();
+        }
+
+
         return rowsum;
     }
 
     public static int suitReader(int x,int y){
+        if (debug){
+            System.out.print("Suit: ");
+        }
 
 //        try{
 //            Robot robot = new Robot();
@@ -109,8 +145,10 @@ public class SolitareScanner {
     }
 
     public static int valueReader(int x,int y){
-
-        return valueReader(rowsumScanner(x,y,25,20,false));
+        if (debug){
+            System.out.print("Value: ");
+        }
+        return valueReader(rowsumScanner(x,y,22,20,false));
     }
 /////////////////////////////////////////////////////////////////////////////////////////////////
     private static int suitReader(int [] cardIndicator){
@@ -154,22 +192,21 @@ public class SolitareScanner {
 
         // 1 = A,..., 11 = J, 12 = Q, 13 = K
         int [][] suitsTemplate = {
-                {5, 5, 7, 7, 6, 8, 6, 7, 8, 11, 13, 13, 8, 8, 8, 6, 0},
-                {3, 7, 9, 8, 4, 4, 4, 4, 5, 5, 5, 4, 4, 4, 11,11,10,0},
-                {6, 8, 9, 4, 3, 4, 5, 7, 7, 7, 4, 4, 4, 7, 9, 8, 3, 0},
-                {4, 5, 5, 6, 7, 7, 7, 7, 8, 8,13,13, 7, 4, 4, 2, 0, 0},
-                {7, 8, 9, 9, 3, 3, 6, 8, 9, 6, 4, 4, 4, 6, 9, 8, 5, 0},
-                {4, 7, 8, 5, 3, 4, 6, 9,10, 8, 7, 7, 8, 7, 9, 7, 4, 0},
-                {11,11,11,4, 3, 4, 4, 4, 3, 4, 3, 4, 4, 4, 3, 3, 0, 0},
-                {3, 7, 9, 8, 8, 7, 8, 7, 7, 9, 8, 7, 7, 8,10, 9, 5, 0},
-                {7, 9, 8, 6, 7, 7, 8,10,10, 7, 4, 3, 4, 8, 7, 2, 0, 0},
-                {10,15,15,13,12,11,12,12,12,12,11,12,11,14,12,10,0, 0},
-                {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 4, 6, 6, 4, 0, 0},
-                {7, 11,12,8, 8, 8, 7, 7, 7, 7, 8, 8,10,11,10, 9, 4, 3},
-                {6, 7, 7, 6, 7, 7, 7, 7, 8, 7, 7, 7, 8, 7, 7, 0, 0, 0},
+                {5, 6, 6, 7, 6, 6, 8, 8, 7, 9,12,12,11, 8, 8, 7, 0, 0},//A (alt0 5, 5, 7, 7, 6, 8, 6, 7, 8, 11, 13, 13, 8, 8, 8, 6, 0) (alt1 5, 6, 6, 7, 6, 6, 7, 7, 6,11,12,13, 8, 7, 6, 0, 0, 0)
+                {7, 9, 6, 4, 4, 3, 4, 4, 4, 4, 4, 4, 4,11,11, 8, 0, 0},//2 (alt0 3, 7, 9, 8, 4, 4, 4, 4, 5, 5, 5, 4, 4, 4, 11,11,10,0)
+                {6, 8, 9, 4, 3, 4, 5, 7, 7, 7, 4, 4, 4, 7, 9, 8, 3, 0},//3
+                {4, 5, 5, 6, 7, 7, 7, 7, 8, 8,13,13, 7, 4, 4, 2, 0, 0},//4
+                {8, 8, 8, 3, 4, 4, 7, 9,10, 4, 4, 4, 4, 8, 9, 8, 0, 0},//5 (alt0 7, 8, 9, 9, 3, 3, 6, 8, 9, 6, 4, 4, 4, 6, 9, 8, 5, 0) (alt1 8, 8, 4, 2, 2, 3, 8, 9, 4, 4, 4, 4, 3, 9, 8, 5, 0, 0)
+                {3, 7, 8, 6, 4, 4, 7,10,10, 8, 8, 7, 8, 8, 9, 7, 5, 0},//6 (alt0 4, 7, 8, 5, 3, 4, 6, 9,10, 8, 7, 7, 8, 7, 9, 7, 4, 0)
+                {11,11,11,4, 3, 4, 4, 4, 3, 4, 3, 4, 4, 4, 3, 3, 0, 0},//7
+                {5, 8, 8, 7, 7, 6, 8, 7, 8, 6, 6, 6, 7, 10, 9, 5, 0, 0},//8 (alt0 3, 7, 9, 8, 8, 7, 8, 7, 7, 9, 8, 7, 7, 8,10, 9, 5, 0)
+                {2, 7, 9, 6, 8, 6, 6, 8,10,10, 6, 3, 3, 4, 8, 7, 2, 0},//9 (alt0 7, 9, 8, 6, 7, 7, 8,10,10, 7, 4, 3, 4, 8, 7, 2, 0, 0)
+                {10,15,15,13,12,11,12,12,12,12,11,12,11,14,12,10,0, 0},//10
+                {4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 4, 6, 6, 4, 0, 0},//11
+                {7, 11,12,8, 8, 8, 7, 7, 7, 7, 8, 8,10,11,10, 9, 4, 3},//12
+                {7, 8, 8, 9, 8, 8, 9, 8, 8, 8, 9, 8, 9, 9, 9, 6, 0, 0},//13 (alt0 6, 7, 7, 6, 7, 7, 7, 7, 8, 7, 7, 7, 8, 7, 7, 0, 0, 0)
         };
 
-System.out.println("cardIndicator length: "+cardIndicator.length+"\t"+suitsTemplate[0].length);
 
         int [] differences=new int[13];
 
@@ -179,11 +216,13 @@ System.out.println("cardIndicator length: "+cardIndicator.length+"\t"+suitsTempl
 
             if (cardIndicator[cardIndicatorIndex]==0){
                 cardIndicatorIndex++;
-            }else{
+            }else if (cardIndicator[suitIndex+cardIndicatorIndex]!=0){
                 for (int i = 0; i < 13; i++) {
-                    differences[i]+=Math.abs(suitsTemplate[i][suitIndex]-cardIndicator[suitIndex+cardIndicatorIndex]);
+                    differences[i]+=Math.pow(suitsTemplate[i][suitIndex]-cardIndicator[suitIndex+cardIndicatorIndex],2);
                 }
                 suitIndex++;
+            }else{
+                break;
             }
 
         }
@@ -195,6 +234,13 @@ System.out.println("cardIndicator length: "+cardIndicator.length+"\t"+suitsTempl
                 minIndex=i;
                 minVal=differences[i];
             }
+        }
+
+        if (debug){
+            for (int i = 0; i < 13; i++) {
+                System.out.println("Difference with "+(i+1)+" is: "+differences[i]);
+            }
+
         }
 
         return minIndex+1;
@@ -222,4 +268,26 @@ System.out.println("cardIndicator length: "+cardIndicator.length+"\t"+suitsTempl
         return 0;
     }
 
+    public static void undoMove(){
+        try{
+            Robot robot = new Robot();
+            robot.mouseMove(1489, 861);
+            robot.mousePress(InputEvent.BUTTON1_MASK);
+            robot.mouseRelease(InputEvent.BUTTON1_MASK);
+
+        }catch (Exception e){
+            System.out.println("Exception -undoMove");
+        }
+    }
+    public static void undoAllMove(){
+        try{
+            Robot robot = new Robot();
+            robot.mouseMove(1172, 865);
+            robot.mousePress(InputEvent.BUTTON1_MASK);
+            robot.mouseRelease(InputEvent.BUTTON1_MASK);
+
+        }catch (Exception e){
+            System.out.println("Exception -undoAllMove");
+        }
+    }
 }

@@ -16,4 +16,6 @@ abstract public class AbstractSolitare {
 
     public abstract void solver();//function that solves the game
 
+    public abstract void dataDump();//this is mean to print off the board.
+
 }
